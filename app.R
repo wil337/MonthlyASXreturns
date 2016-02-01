@@ -19,7 +19,7 @@ ui <- navbarPage("ASX list",
                  selectInput('ASX', 'ASX code', choices=asxList0$ASX.code,selected="ANZ"),
                  helpText("This application is used to show the distribution
                           of historical monthly returns from the Australian Stock Exchange (ASX).
-                          visit http://github.com/wil337/")
+                          visit https://github.com/wil337/MonthlyASXreturns")
                ),
                mainPanel(
                  textOutput('returnMedian'),
