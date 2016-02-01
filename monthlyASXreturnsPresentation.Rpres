@@ -1,0 +1,58 @@
+monthlyASXreturnsPresentation
+========================================================
+author: William Lee
+date: 31 Jan 2016
+
+Purpose
+========================================================
+
+The purpose of this app is to get the monthly returns from yahoo for stocks on the Australian Stock exchange
+
+Data
+========================================================
+
+All possible stock quotes listed on the  Australian Stock Exchange available, with returns extracted from yahoo. For example, for ANZ stock ticker:
+
+```{r,echo=FALSE}
+library(quantmod)
+library(dplyr)
+asxList0 <-read.csv("http://www.asx.com.au/asx/research/ASXListedCompanies.csv", skip=2,stringsAsFactors=FALSE)
+data <- getSymbols(paste0("ANZ.AX"), src = "yahoo", 
+                       from = as.Date("2010-01-01"),
+                       to = as.Date("2016-01-01"),
+                       auto.assign = FALSE)
+    adjusted <- paste("ANZ.AX",".Adjusted",sep="")
+    data <- data[, adjusted, drop=F]
+    d<-data.frame(x=monthlyReturn(data))
+    d$mth <-row.names(d)
+    d2<- d %>% mutate(mthly.ret.pa = (1+monthly.returns)^12-1) %>%
+      mutate(yr = substr(mth,1,4))
+    summary(d2)
+    mthlyRet <- d2
+```
+
+ggplot Histogram 
+========================================================
+Using the power of ggplot, we have historical distribution of monthly returns
+```{r, echo=FALSE}
+library(ggplot2)
+g<-ggplot(data=mthlyRet ,aes(x=monthly.returns))+
+      geom_density(kernel='gaussian')+
+      geom_dotplot(aes(fill=as.factor(yr)),method='histodot',stackgroups=TRUE)+
+      scale_fill_brewer(palette="Blues")+
+      scale_y_continuous(NULL, breaks = NULL)
+    g
+```
+
+plotly time series 
+========================================================
+Using the power of plotly, we have interactive charts. This one shows the time series history
+```{r, echo=FALSE}
+    library(scales)
+    library(plotly)
+    ts<-ggplot(mthlyRet,aes(x=mth,y=monthly.returns))+
+      geom_bar(stat='identity')+
+      scale_y_continuous(labels=scales::percent)
+    ts
+    ggplotly(ts)
+```
